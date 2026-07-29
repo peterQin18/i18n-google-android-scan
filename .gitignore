@@ -1,0 +1,7 @@
+.gradle/
+build/
+local.properties
+.env
+.env.*
+*.service-account.json
+service-account*.json
