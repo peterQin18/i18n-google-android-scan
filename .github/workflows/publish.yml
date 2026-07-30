@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   publish:
+    environment: plugin-publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
