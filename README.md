@@ -1,5 +1,10 @@
 # Android i18n Scanner Gradle Plugin
 
+[![Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/io.github.peterqin18.i18n-google-android-scan?label=Plugin%20Portal)](https://plugins.gradle.org/plugin/io.github.peterqin18.i18n-google-android-scan)
+[![Sonar Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=peterQin18_i18n-google-android-scan&metric=alert_status)](https://sonarcloud.io/summary/overall?id=peterQin18_i18n-google-android-scan)
+[![Sonar Coverage](https://sonarcloud.io/api/project_badges/measure?project=peterQin18_i18n-google-android-scan&metric=coverage)](https://sonarcloud.io/summary/overall?id=peterQin18_i18n-google-android-scan)
+[![License](https://img.shields.io/github/license/peterQin18/i18n-google-android-scan)](LICENSE)
+
 [中文说明](README.zh-CN.md)
 
 Scans Android XML, Kotlin, and Java source files for hard-coded text that should be moved to localized resources. It produces a machine-readable report and can fail CI when candidates remain.
