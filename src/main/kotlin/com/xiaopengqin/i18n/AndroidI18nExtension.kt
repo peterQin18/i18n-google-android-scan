@@ -5,6 +5,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.DirectoryProperty
 import javax.inject.Inject
 
 abstract class AndroidI18nExtension @Inject constructor(objects: ObjectFactory) {
@@ -15,6 +16,7 @@ abstract class AndroidI18nExtension @Inject constructor(objects: ObjectFactory) 
         objects.listProperty(String::class.java).convention(listOf("src/main"))
     val generatedFileName: Property<String> =
         objects.property(String::class.java).convention("i18n_generated.xml")
+    val outputDirectory: DirectoryProperty = objects.directoryProperty()
     val sourceMarker: Property<String> = objects.property(String::class.java).convention("~")
     val failOnCandidates: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 
@@ -48,4 +50,3 @@ abstract class LlmConfig @Inject constructor(objects: ObjectFactory) {
     val promptFile: RegularFileProperty = objects.fileProperty()
     val temperature: Property<Double> = objects.property(Double::class.java).convention(0.2)
 }
-

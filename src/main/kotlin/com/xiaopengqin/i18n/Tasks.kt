@@ -9,6 +9,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -28,6 +29,9 @@ abstract class I18nScanTask : DefaultTask() {
     @get:OutputFile
     abstract val reportFile: RegularFileProperty
 
+    @get:Optional @get:InputFile @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val manifestFile: RegularFileProperty
+
     @TaskAction
     fun scan() {
         val scanner = AndroidSourceScanner(sourceMarker.get())
@@ -35,7 +39,11 @@ abstract class I18nScanTask : DefaultTask() {
         val candidates = scanRoots.get()
             .flatMap { relativeRoot -> root.resolve(relativeRoot).walkTopDown().toList() }
             .filter { it.isFile && it.extension.lowercase() in setOf("xml", "kt", "java") }
-            .flatMap(scanner::scan)
+            .flatMap(scanner::scan).toMutableList()
+        val manifestEntries = manifestFile.orNull?.asFile?.let(I18nManifest::read).orEmpty()
+        candidates += manifestEntries.map { entry ->
+            I18nCandidate("<i18n-manifest>", 0, "applied-compose", entry.text, false, suggestedKey = entry.key)
+        }
 
         val report = reportFile.get().asFile
         report.parentFile.mkdirs()
@@ -90,8 +98,5 @@ private fun List<I18nCandidate>.toJson(): String = joinToString(
     postfix = "\n]\n",
     separator = ",\n",
 ) { candidate ->
-    "  {\"file\":\"${candidate.file.escapeJson()}\",\"line\":${candidate.line},\"kind\":\"${candidate.kind}\",\"text\":\"${candidate.text.escapeJson()}\",\"forced\":${candidate.forced}}"
+    "  {\"file\":\"${candidate.file.escapeJson()}\",\"line\":${candidate.line},\"kind\":\"${candidate.kind}\",\"text\":\"${candidate.text.escapeJson()}\",\"forced\":${candidate.forced},\"resourceName\":${candidate.resourceName?.let { "\"${it.escapeJson()}\"" } ?: "null"},\"suggestedKey\":${candidate.suggestedKey?.let { "\"${it.escapeJson()}\"" } ?: "null"}}"
 }
-
-private fun String.escapeJson(): String =
-    replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
