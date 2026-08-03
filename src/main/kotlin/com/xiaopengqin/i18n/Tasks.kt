@@ -3,10 +3,15 @@ package com.xiaopengqin.i18n
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
@@ -20,6 +25,9 @@ abstract class I18nScanTask : DefaultTask() {
     @get:Input
     abstract val sourceMarker: Property<String>
 
+    @get:OutputFile
+    abstract val reportFile: RegularFileProperty
+
     @TaskAction
     fun scan() {
         val scanner = AndroidSourceScanner(sourceMarker.get())
@@ -29,7 +37,7 @@ abstract class I18nScanTask : DefaultTask() {
             .filter { it.isFile && it.extension.lowercase() in setOf("xml", "kt", "java") }
             .flatMap(scanner::scan)
 
-        val report = project.layout.buildDirectory.file("reports/i18n/scan.json").get().asFile
+        val report = reportFile.get().asFile
         report.parentFile.mkdirs()
         report.writeText(candidates.toJson())
         logger.lifecycle("i18nScan: found ${candidates.size} candidate(s). Report: ${report.relativeTo(root)}")
@@ -40,9 +48,13 @@ abstract class I18nCheckTask : DefaultTask() {
     @get:Input
     abstract val failOnCandidates: Property<Boolean>
 
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val reportFile: RegularFileProperty
+
     @TaskAction
     fun check() {
-        val report = project.layout.buildDirectory.file("reports/i18n/scan.json").get().asFile
+        val report = reportFile.get().asFile
         if (!report.exists()) {
             throw GradleException("Run i18nScan before i18nCheck.")
         }
